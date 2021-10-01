@@ -2339,14 +2339,12 @@ MYLOG(DETAIL_LOG_LEVEL, "!!SC_fetch return =%d\n", ret);
 							QR_concat(last, res);
 							self->multi_statement = TRUE;
 						}
+						last = res;
 						if (!QR_command_maybe_successful(res))
 						{
 							SC_set_errorinfo(self, res, 0);
-							QR_Destructor(rhold.first);
 							break;
 						}
-
-						last = res;
 					}
 				}
 			}
