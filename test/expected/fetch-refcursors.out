@@ -4,9 +4,16 @@ disconnecting
 
 -- TEST using FetchRefcursors=0 and SQL_ATTR_AUTOCOMMIT=1
 connected
+Input param multiple is 0
+Output param num_cursor is 1
+--1 Result set:
+1	ref1	NULL
+
+Input param multiple is 1
 Output param num_cursor is 2
 --1 Result set:
-2	ref1	ref2
+2	ref1	<unnamed portal 1>
+
 disconnecting
 
 -- TEST using FetchRefcursors=1 and SQL_ATTR_AUTOCOMMIT=1
@@ -16,6 +23,14 @@ HY000=Query must be executed in a transaction when FetchRefcursors setting is en
 
 -- TEST using FetchRefcursors=1 and SQL_ATTR_AUTOCOMMIT=0
 connected
+Input param multiple is 0
+Output param num_cursor is 1
+--1 Result set:
+1	foo
+2	bar
+3	foobar
+
+Input param multiple is 1
 Output param num_cursor is 2
 --1 Result set:
 1	foo
@@ -25,4 +40,5 @@ Output param num_cursor is 2
 foobar	3
 bar	2
 foo	1
+
 disconnecting
