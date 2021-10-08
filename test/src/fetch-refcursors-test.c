@@ -117,10 +117,10 @@ int main(int argc, char **argv)
 {
 	setup_procedure();
 
-	refcursor_test("FetchRefcursors=0", SQL_AUTOCOMMIT_ON, FALSE);
-	refcursor_test("FetchRefcursors=1", SQL_AUTOCOMMIT_ON, FALSE);
-	refcursor_test("FetchRefcursors=1", SQL_AUTOCOMMIT_OFF, FALSE);
+	refcursor_test("FetchRefcursors=0", SQL_AUTOCOMMIT_ON, TRUE);
+	refcursor_test("FetchRefcursors=1", SQL_AUTOCOMMIT_ON, TRUE);
 	refcursor_test("FetchRefcursors=1", SQL_AUTOCOMMIT_OFF, TRUE);
+	refcursor_test("FetchRefcursors=1", SQL_AUTOCOMMIT_OFF, FALSE);
 
 	return 0;
 }
