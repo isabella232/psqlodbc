@@ -10,7 +10,7 @@ static void print_all_results(HSTMT hstmt)
 	int rc = SQL_SUCCESS;
 	for (i = 1; rc == SQL_SUCCESS || rc == SQL_SUCCESS_WITH_INFO; i++)
 	{
-		/*** Verify that column metadata and attributes are correct in each result ***/
+		/*** Verify column metadata, attributes and row data in each result ***/
 		printf("--%d\n", i);
 		print_result_meta(hstmt);
 		print_result_with_column_names(hstmt);
@@ -67,7 +67,7 @@ int main(int argc, char **argv)
 	rc = SQLFreeStmt(hstmt, SQL_CLOSE);
 	CHECK_STMT_RESULT(rc, "SQLFreeStmt failed", hstmt);
 
-	/*** Different column name, type and source for the same column number ***/
+	/*** Different column name, type and source between results for the same column index ***/
 
 	rc = SQLExecDirect(hstmt, (SQLCHAR *) "SELECT id, t FROM testtab1; SELECT t, 2 result FROM testtab1", SQL_NTS);
 	CHECK_STMT_RESULT(rc, "SQLExecDirect failed", hstmt);
