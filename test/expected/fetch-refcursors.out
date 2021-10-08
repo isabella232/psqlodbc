@@ -38,9 +38,9 @@ t: VARCHAR(20) digits: 0, nullable
 id: INTEGER(10) digits: 0, nullable
 Result set:
 t	id
-foo	-1
-bar	-2
 foobar	-3
+bar	-2
+foo	-1
 disconnecting
 
 -- TEST using FetchRefcursors=1, autocommit=0, multiple=0

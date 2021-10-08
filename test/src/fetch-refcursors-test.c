@@ -42,7 +42,7 @@ static void setup_procedure()
 			"OPEN ref1 FOR SELECT id, t FROM testtab1 ORDER BY id ASC; \n"
 			"IF multi_result THEN \n"
 			"    num_cursor := num_cursor + 1; \n"
-			"    OPEN ref2 FOR SELECT t, -id id FROM testtab1 ORDER BY id DESC; \n"
+			"    OPEN ref2 FOR SELECT t, -id id FROM testtab1 ORDER BY id ASC; \n"
 			"END IF; \n"
 			"END; \n"
 			"$procedure$ \n"
