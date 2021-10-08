@@ -5,13 +5,7 @@ disconnecting
 -- TEST using FetchRefcursors=0, autocommit=1, multiple=1
 connected
 Output param num_cursor is 2
---1
-Result set metadata:
-num_cursor: INTEGER(10) digits: 0, nullable
-ref1: VARCHAR(63) digits: 0, nullable
-ref2: VARCHAR(63) digits: 0, nullable
-Result set:
-num_cursor	ref1	ref2
+--1 Result set:
 2	ref1	<unnamed portal 1>
 disconnecting
 
@@ -23,35 +17,20 @@ HY000=Query must be executed in a transaction when FetchRefcursors setting is en
 -- TEST using FetchRefcursors=1, autocommit=0, multiple=1
 connected
 Output param num_cursor is 2
---1
-Result set metadata:
-id: INTEGER(10) digits: 0, not nullable
-t: VARCHAR(20) digits: 0, nullable
-Result set:
-id	t
+--1 Result set:
 1	foo
 2	bar
 3	foobar
---2
-Result set metadata:
-t: VARCHAR(20) digits: 0, nullable
-id: INTEGER(10) digits: 0, nullable
-Result set:
-t	id
-foobar	-3
-bar	-2
-foo	-1
+--2 Result set:
+foobar	3
+bar	2
+foo	1
 disconnecting
 
 -- TEST using FetchRefcursors=1, autocommit=0, multiple=0
 connected
 Output param num_cursor is 1
---1
-Result set metadata:
-id: INTEGER(10) digits: 0, not nullable
-t: VARCHAR(20) digits: 0, nullable
-Result set:
-id	t
+--1 Result set:
 1	foo
 2	bar
 3	foobar

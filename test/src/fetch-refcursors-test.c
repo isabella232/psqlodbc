@@ -11,9 +11,8 @@ static void print_all_results(HSTMT hstmt)
 	int rc = SQL_SUCCESS;
 	for (i = 1; rc == SQL_SUCCESS || rc == SQL_SUCCESS_WITH_INFO; i++)
 	{
-		printf("--%d\n", i);
-		print_result_meta(hstmt);
-		print_result_with_column_names(hstmt);
+		printf("--%d ", i);
+		print_result(hstmt);
 
 		rc = SQLMoreResults(hstmt);
 	}
@@ -42,7 +41,7 @@ static void setup_procedure()
 			"OPEN ref1 FOR SELECT id, t FROM testtab1 ORDER BY id ASC; \n"
 			"IF multi_result THEN \n"
 			"    num_cursor := num_cursor + 1; \n"
-			"    OPEN ref2 FOR SELECT t, -id id FROM testtab1 ORDER BY id ASC; \n"
+			"    OPEN ref2 FOR SELECT t, id FROM testtab1 ORDER BY id DESC; \n"
 			"END IF; \n"
 			"END; \n"
 			"$procedure$ \n"
