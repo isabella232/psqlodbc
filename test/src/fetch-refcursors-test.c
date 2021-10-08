@@ -11,32 +11,14 @@ static void print_all_results(HSTMT hstmt)
 	int rc = SQL_SUCCESS;
 	for (i = 1; rc == SQL_SUCCESS || rc == SQL_SUCCESS_WITH_INFO; i++)
 	{
-		printf("--%d ", i);
-		print_result(hstmt);
+		printf("--%d\n", i);
+		print_result_meta(hstmt);
+		print_result_with_column_names(hstmt);
 
 		rc = SQLMoreResults(hstmt);
 	}
 	if (rc != SQL_NO_DATA)
 		CHECK_STMT_RESULT(rc, "SQLMoreResults failed", hstmt);
-}
-
-static SQLRETURN execute_and_print(HSTMT hstmt, BOOL multiple, int *num_cursor)
-{
-	SQLRETURN	rc;
-
-	rc = SQLExecute(hstmt);
-	if (!SQL_SUCCEEDED(rc))
-	{
-		print_diag("SQLExecute failed", SQL_HANDLE_STMT, hstmt);
-		return rc;
-	}
-
-	printf("Input param multiple is %d\n", multiple);
-	printf("Output param num_cursor is %d\n", *num_cursor);
-	print_all_results(hstmt);
-	printf("\n");
-
-	return SQL_SUCCESS;
 }
 
 static void setup_procedure()
@@ -52,15 +34,15 @@ static void setup_procedure()
 	CHECK_CONN_RESULT(rc, "failed to allocate stmt handle", conn);
 
 	rc = SQLExecDirect(hstmt, "create or replace procedure refproc"
-			"(multiple boolean, inout num_cursor integer, inout ref1 refcursor default 'ref1', inout ref2 refcursor default null) as "
+			"(multi_result boolean, inout num_cursor integer, inout ref1 refcursor default 'ref1', inout ref2 refcursor default null) as "
 			"$procedure$ \n"
 			"DECLARE \n"
 			"BEGIN \n"
 			"num_cursor := 1; \n"
 			"OPEN ref1 FOR SELECT id, t FROM testtab1 ORDER BY id ASC; \n"
-			"IF multiple THEN \n"
+			"IF multi_result THEN \n"
 			"    num_cursor := num_cursor + 1; \n"
-			"    OPEN ref2 FOR SELECT t, id FROM testtab1 ORDER BY id DESC; \n"
+			"    OPEN ref2 FOR SELECT t, -id id FROM testtab1 ORDER BY id DESC; \n"
 			"END IF; \n"
 			"END; \n"
 			"$procedure$ \n"
@@ -74,14 +56,14 @@ static void setup_procedure()
 	test_disconnect();
 }
 
-static void refcursor_test(char* connectparams, SQLUINTEGER autocommit)
+static void refcursor_test(char* connectparams, SQLUINTEGER autocommit, BOOL multiple)
 {
 	SQLRETURN	rc;
 	HSTMT		hstmt = SQL_NULL_HSTMT;
-	BOOL		multiple = FALSE;
+	BOOL		multi_result = multiple;
 	int	        num_cursor = 0;
 
-	printf("\n-- TEST using %s and SQL_ATTR_AUTOCOMMIT=%u\n", connectparams, autocommit);
+	printf("\n-- TEST using %s, autocommit=%u, multiple=%d\n", connectparams, autocommit, multiple);
 
 	test_connect_ext(connectparams);
 
@@ -100,7 +82,7 @@ static void refcursor_test(char* connectparams, SQLUINTEGER autocommit)
 						  SQL_BIT,		/* param type */
 						  0,			/* column size */
 						  0,			/* dec digits */
-						  &multiple,	/* param value ptr */
+						  &multi_result,/* param value ptr */
 						  0,	        /* buffer len */
 						  NULL		    /* StrLen_or_IndPtr */);
 	CHECK_STMT_RESULT(rc, "SQLBindParameter failed", hstmt);
@@ -115,16 +97,15 @@ static void refcursor_test(char* connectparams, SQLUINTEGER autocommit)
 						  NULL		    /* StrLen_or_IndPtr */);
 	CHECK_STMT_RESULT(rc, "SQLBindParameter failed", hstmt);
 
-	/* Execute procedure with single result */
-	rc = execute_and_print(hstmt, multiple, &num_cursor);
+	rc = SQLExecute(hstmt);
 	if (!SQL_SUCCEEDED(rc))
+	{
+		print_diag("SQLExecute failed", SQL_HANDLE_STMT, hstmt);
 		return;
+	}
 
-	/* Execute procedure with multiple results */
-	multiple = TRUE;
-	rc = execute_and_print(hstmt, multiple, &num_cursor);
-	if (!SQL_SUCCEEDED(rc))
-		return;
+	printf("Output param num_cursor is %d\n", num_cursor);
+	print_all_results(hstmt);
 
 	rc = SQLFreeStmt(hstmt, SQL_CLOSE);
 	CHECK_STMT_RESULT(rc, "SQLFreeStmt failed", hstmt);
@@ -136,9 +117,10 @@ int main(int argc, char **argv)
 {
 	setup_procedure();
 
-	refcursor_test("FetchRefcursors=0", SQL_AUTOCOMMIT_ON);
-	refcursor_test("FetchRefcursors=1", SQL_AUTOCOMMIT_ON);
-	refcursor_test("FetchRefcursors=1", SQL_AUTOCOMMIT_OFF);
+	refcursor_test("FetchRefcursors=0", SQL_AUTOCOMMIT_ON, FALSE);
+	refcursor_test("FetchRefcursors=1", SQL_AUTOCOMMIT_ON, FALSE);
+	refcursor_test("FetchRefcursors=1", SQL_AUTOCOMMIT_OFF, FALSE);
+	refcursor_test("FetchRefcursors=1", SQL_AUTOCOMMIT_OFF, TRUE);
 
 	return 0;
 }
